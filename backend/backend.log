@@ -1,0 +1,22 @@
+Server running on port 5000
+MongoDB Connected: ac-hvceyxe-shard-00-02.kuoError: listen EADDRINUSE: address already in use :::5000
+    at Server.setupListenHandle [as _listen2] (node:net:1902:16)
+    at listenInCluster (node:net:1959:12)
+    at Server.listen (node:net:2061:7)
+    at Function.listen (/home/eli/projet/personal-expense-tracker/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/home/eli/projet/personal-expense-tracker/backend/src/server.ts:39:5)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module.m._compile (/home/eli/projet/personal-expense-tracker/node_modules/ts-node/src/index.ts:1618:23)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Object.require.extensions.<computed> [as .ts] (/home/eli/projet/personal-expense-tracker/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1275:32) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '::',
+  port: 5000
+}
+npm ERR! Lifecycle script `start` failed with error: 
+npm ERR! Error: command failed 
+npm ERR!   in workspace: personal-expense-tracker-backend@1.0.0 
+npm ERR!   at location: /home/eli/projet/personal-expense-tracker/backend 
