@@ -69,35 +69,55 @@ export default function Categories() {
 
   const columns = [
     { header: 'Nom', accessor: (c: Category) => c.name },
-    { header: 'Type', accessor: (c: Category) => c.type },
+    { header: 'Type', accessor: (c: Category) => c.type === 'expense' ? 'Dépense' : 'Revenu' },
     { header: 'Actions', accessor: (c: Category) => (
       <div className="flex gap-2">
-        <button className="text-blue-600" onClick={() => { setCurrentCategory(c); setIsFormOpen(true); }}>Modifier</button>
-        <button className="text-red-600" onClick={() => handleDelete(c._id)}>Supprimer</button>
+        <button className="text-blue-600 hover:text-blue-800" onClick={() => { setCurrentCategory(c); setIsFormOpen(true); }}>Modifier</button>
+        <button className="text-red-600 hover:text-red-800" onClick={() => handleDelete(c._id)}>Supprimer</button>
       </div>
     )},
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader 
         title="Catégories" 
         description="Gérez vos catégories" 
-        action={<button className="bg-indigo-600 text-white px-4 py-2 rounded-lg" onClick={() => { setCurrentCategory(null); setIsFormOpen(true); }}>+ Créer une catégorie</button>} 
+        action={<button className="bg-indigo-600 text-white px-4 py-2 rounded-lg" onClick={() => { setCurrentCategory(null); setIsFormOpen(true); }}>+ Créer</button>} 
       />
-      <DataTable data={categories} columns={columns} />
+
+      {/* Mobile View */}
+      <div className="md:hidden space-y-4">
+        {categories.map((c) => (
+          <div key={c._id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+            <div>
+              <p className="font-bold">{c.name}</p>
+              <p className="text-sm text-gray-500">{c.type === 'expense' ? 'Dépense' : 'Revenu'}</p>
+            </div>
+            <div className="flex gap-2">
+                <button className="text-blue-600 text-sm" onClick={() => { setCurrentCategory(c); setIsFormOpen(true); }}>Modif</button>
+                <button className="text-red-600 text-sm" onClick={() => handleDelete(c._id)}>Suppr</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <DataTable data={categories} columns={columns} />
+      </div>
 
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <form className="bg-white p-6 rounded-lg shadow-lg" onSubmit={handleSave}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <form className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md" onSubmit={handleSave}>
             <h2 className="text-lg font-bold mb-4">{currentCategory ? 'Modifier' : 'Créer'} une catégorie</h2>
-            <input name="name" defaultValue={currentCategory?.name} placeholder="Nom" className="border p-2 mb-2 w-full" required />
-            <select name="type" defaultValue={currentCategory?.type || 'expense'} className="border p-2 mb-4 w-full">
+            <input name="name" defaultValue={currentCategory?.name} placeholder="Nom" className="border p-2 mb-2 w-full rounded" required />
+            <select name="type" defaultValue={currentCategory?.type || 'expense'} className="border p-2 mb-4 w-full rounded">
               <option value="expense">Dépense</option>
               <option value="income">Revenu</option>
             </select>
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setIsFormOpen(false)}>Annuler</button>
+              <button type="button" className="px-4 py-2 rounded text-gray-600 hover:bg-gray-100" onClick={() => setIsFormOpen(false)}>Annuler</button>
               <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">Enregistrer</button>
             </div>
           </form>

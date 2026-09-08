@@ -4,6 +4,7 @@ import DataTable from '../components/common/DataTable';
 import { getExpenses, createExpense, updateExpense, deleteExpense, Expense } from '../services/expenseService';
 import { getCategories, Category } from '../services/categoryService';
 import { useNavigate } from 'react-router-dom';
+import { formatMGA } from '../utils/formatCurrency';
 
 export default function Expenses() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -80,37 +81,63 @@ export default function Expenses() {
   const columns = [
     { header: 'Description', accessor: (e: Expense) => e.description },
     { header: 'Catégorie', accessor: (e: Expense) => categories.find(c => c._id === e.category)?.name || e.category },
-    { header: 'Montant', accessor: (e: Expense) => `${e.amount} €` },
+    { header: 'Montant', accessor: (e: Expense) => formatMGA(e.amount) },
     { header: 'Actions', accessor: (e: Expense) => (
       <div className="flex gap-2">
-        <button className="text-blue-600" onClick={() => { setCurrentExpense(e); setIsFormOpen(true); }}>Modifier</button>
-        <button className="text-red-600" onClick={() => handleDelete(e._id)}>Supprimer</button>
+        <button className="text-blue-600 hover:text-blue-800" onClick={() => { setCurrentExpense(e); setIsFormOpen(true); }}>Modifier</button>
+        <button className="text-red-600 hover:text-red-800" onClick={() => handleDelete(e._id)}>Supprimer</button>
       </div>
     )},
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader 
         title="Dépenses" 
         description="Gérez vos dépenses" 
-        action={<button className="bg-indigo-600 text-white px-4 py-2 rounded-lg" onClick={() => { setCurrentExpense(null); setIsFormOpen(true); }}>+ Créer une dépense</button>} 
+        action={<button className="bg-indigo-600 text-white px-4 py-2 rounded-lg" onClick={() => { setCurrentExpense(null); setIsFormOpen(true); }}>+ Créer</button>} 
       />
-      <DataTable data={expenses} columns={columns} />
+      
+      {/* Mobile View */}
+      <div className="md:hidden space-y-4">
+        {expenses.map((e) => (
+          <div key={e._id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+            <div>
+              <p className="font-bold">{e.description}</p>
+              <p className="text-sm text-gray-500">{categories.find(c => c._id === e.category)?.name || e.category}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-red-600">{formatMGA(e.amount)}</p>
+              <div className="flex gap-2 mt-2">
+                <button className="text-blue-600 text-sm" onClick={() => { setCurrentExpense(e); setIsFormOpen(true); }}>Modif</button>
+                <button className="text-red-600 text-sm" onClick={() => handleDelete(e._id)}>Suppr</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <DataTable data={expenses} columns={columns} />
+      </div>
 
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <form className="bg-white p-6 rounded-lg shadow-lg" onSubmit={handleSave}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <form className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md" onSubmit={handleSave}>
             <h2 className="text-lg font-bold mb-4">{currentExpense ? 'Modifier' : 'Créer'} une dépense</h2>
-            <input name="description" defaultValue={currentExpense?.description} placeholder="Description" className="border p-2 mb-2 w-full" required />
-            <select name="category" defaultValue={currentExpense?.category || categories[0]?._id} className="border p-2 mb-2 w-full" required>
+            <input name="description" defaultValue={currentExpense?.description} placeholder="Description" className="border p-2 mb-2 w-full rounded" required />
+            <select name="category" defaultValue={currentExpense?.category || categories.filter(c => c.type === 'expense')[0]?._id} className="border p-2 mb-2 w-full rounded" required>
               {categories.filter(c => c.type === 'expense').map(c => (
                 <option key={c._id} value={c._id}>{c.name}</option>
               ))}
             </select>
-            <input name="amount" type="number" defaultValue={currentExpense?.amount} placeholder="Montant" className="border p-2 mb-4 w-full" required />
+            <div className="relative mb-4">
+              <input name="amount" type="number" defaultValue={currentExpense?.amount} placeholder="Montant" className="border p-2 w-full rounded pr-12" required />
+              <span className="absolute right-3 top-2.5 text-gray-500">Ar</span>
+            </div>
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setIsFormOpen(false)}>Annuler</button>
+              <button type="button" className="px-4 py-2 rounded text-gray-600 hover:bg-gray-100" onClick={() => setIsFormOpen(false)}>Annuler</button>
               <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">Enregistrer</button>
             </div>
           </form>

@@ -4,6 +4,7 @@ import DataTable from '../components/common/DataTable';
 import { getIncomes, createIncome, updateIncome, deleteIncome, Income } from '../services/incomeService';
 import { getCategories, Category } from '../services/categoryService';
 import { useNavigate } from 'react-router-dom';
+import { formatMGA } from '../utils/formatCurrency';
 
 export default function Incomes() {
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -80,37 +81,63 @@ export default function Incomes() {
   const columns = [
     { header: 'Description', accessor: (i: Income) => i.description },
     { header: 'Catégorie', accessor: (i: Income) => categories.find(c => c._id === i.category)?.name || i.category },
-    { header: 'Montant', accessor: (i: Income) => `${i.amount} €` },
+    { header: 'Montant', accessor: (i: Income) => formatMGA(i.amount) },
     { header: 'Actions', accessor: (i: Income) => (
       <div className="flex gap-2">
-        <button className="text-blue-600" onClick={() => { setCurrentIncome(i); setIsFormOpen(true); }}>Modifier</button>
-        <button className="text-red-600" onClick={() => handleDelete(i._id)}>Supprimer</button>
+        <button className="text-blue-600 hover:text-blue-800" onClick={() => { setCurrentIncome(i); setIsFormOpen(true); }}>Modifier</button>
+        <button className="text-red-600 hover:text-red-800" onClick={() => handleDelete(i._id)}>Supprimer</button>
       </div>
     )},
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader 
         title="Revenus" 
         description="Gérez vos revenus" 
-        action={<button className="bg-indigo-600 text-white px-4 py-2 rounded-lg" onClick={() => { setCurrentIncome(null); setIsFormOpen(true); }}>+ Créer un revenu</button>} 
+        action={<button className="bg-indigo-600 text-white px-4 py-2 rounded-lg" onClick={() => { setCurrentIncome(null); setIsFormOpen(true); }}>+ Créer</button>} 
       />
-      <DataTable data={incomes} columns={columns} />
+      
+      {/* Mobile View */}
+      <div className="md:hidden space-y-4">
+        {incomes.map((i) => (
+          <div key={i._id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center">
+            <div>
+              <p className="font-bold">{i.description}</p>
+              <p className="text-sm text-gray-500">{categories.find(c => c._id === i.category)?.name || i.category}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-green-600">{formatMGA(i.amount)}</p>
+              <div className="flex gap-2 mt-2">
+                <button className="text-blue-600 text-sm" onClick={() => { setCurrentIncome(i); setIsFormOpen(true); }}>Modif</button>
+                <button className="text-red-600 text-sm" onClick={() => handleDelete(i._id)}>Suppr</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <DataTable data={incomes} columns={columns} />
+      </div>
 
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <form className="bg-white p-6 rounded-lg shadow-lg" onSubmit={handleSave}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <form className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md" onSubmit={handleSave}>
             <h2 className="text-lg font-bold mb-4">{currentIncome ? 'Modifier' : 'Créer'} un revenu</h2>
-            <input name="description" defaultValue={currentIncome?.description} placeholder="Description" className="border p-2 mb-2 w-full" required />
-            <select name="category" defaultValue={currentIncome?.category || categories.filter(c => c.type === 'income')[0]?._id} className="border p-2 mb-2 w-full" required>
+            <input name="description" defaultValue={currentIncome?.description} placeholder="Description" className="border p-2 mb-2 w-full rounded" required />
+            <select name="category" defaultValue={currentIncome?.category || categories.filter(c => c.type === 'income')[0]?._id} className="border p-2 mb-2 w-full rounded" required>
               {categories.filter(c => c.type === 'income').map(c => (
                 <option key={c._id} value={c._id}>{c.name}</option>
               ))}
             </select>
-            <input name="amount" type="number" defaultValue={currentIncome?.amount} placeholder="Montant" className="border p-2 mb-4 w-full" required />
+            <div className="relative mb-4">
+              <input name="amount" type="number" defaultValue={currentIncome?.amount} placeholder="Montant" className="border p-2 w-full rounded pr-12" required />
+              <span className="absolute right-3 top-2.5 text-gray-500">Ar</span>
+            </div>
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setIsFormOpen(false)}>Annuler</button>
+              <button type="button" className="px-4 py-2 rounded text-gray-600 hover:bg-gray-100" onClick={() => setIsFormOpen(false)}>Annuler</button>
               <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">Enregistrer</button>
             </div>
           </form>
