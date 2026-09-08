@@ -1,5 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Receipt, TrendingUp, PieChart, Landmark, Settings, User, LogOut } from 'lucide-react';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
   const location = useLocation();
@@ -14,6 +16,8 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: 
 };
 
 export default function Layout() {
+  const { logout } = useContext(AuthContext);
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <aside className="w-64 bg-gray-900 text-white p-6 flex flex-col">
@@ -27,7 +31,7 @@ export default function Layout() {
         </nav>
         <div className="border-t border-gray-800 pt-6 space-y-2">
           <SidebarItem to="/profile" icon={User} label="Profil" />
-          <button className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400">
+          <button onClick={logout} className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400">
             <LogOut size={20} />
             <span>Déconnexion</span>
           </button>
